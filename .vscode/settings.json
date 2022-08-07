@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "*.lex": "lex",
+    "stm32f1xx.h": "c",
+    "stm32f103xb.h": "c"
+  }
+}
