@@ -56,18 +56,18 @@ void Timer::disableInterrupt()
   this->timer->DIER &= ~TIM_DIER_UIE;
 }
 
-void Timer::enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback)
+void Timer::enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback)
 {
-  IRQn_Type interrupt = _getNVICInterruptForTimer();
-  NVICInterrupt::setHandler(interrupt, callback);
-  NVICInterrupt::setPriority(interrupt, priority);
-  NVICInterrupt::enableInterrupt(interrupt);
+  IRQn_Type interrupt = _getNvicInterruptForTimer();
+  NvicInterrupt::setHandler(interrupt, callback);
+  NvicInterrupt::setPriority(interrupt, priority);
+  NvicInterrupt::enableInterrupt(interrupt);
 }
 
-void Timer::disableNVICInterrupt()
+void Timer::disableNvicInterrupt()
 {
-  IRQn_Type interrupt = _getNVICInterruptForTimer();
-  NVICInterrupt::disableInterrupt(interrupt);
+  IRQn_Type interrupt = _getNvicInterruptForTimer();
+  NvicInterrupt::disableInterrupt(interrupt);
 }
 
 bool Timer::isInterruptPending()
@@ -80,14 +80,14 @@ void Timer::clearInterruptPending()
   this->timer->SR &= ~(TIM_SR_UIF);
 }
 
-bool Timer::isNVICInterruptPending()
+bool Timer::isNvicInterruptPending()
 {
-  return NVICInterrupt::getPending(_getNVICInterruptForTimer());
+  return NvicInterrupt::getPending(_getNvicInterruptForTimer());
 }
 
-void Timer::clearNVICInterruptPending()
+void Timer::clearNvicInterruptPending()
 {
-  NVICInterrupt::clearPending(_getNVICInterruptForTimer());
+  NvicInterrupt::clearPending(_getNvicInterruptForTimer());
 }
 
 void Timer::_enablePeripherals()
@@ -132,7 +132,7 @@ void Timer::_disablePeripherals()
   }
 }
 
-IRQn_Type Timer::_getNVICInterruptForTimer()
+IRQn_Type Timer::_getNvicInterruptForTimer()
 {
   if (this->timer == TIM2)       return TIM2_IRQn;
   else if (this->timer == TIM3)  return TIM3_IRQn;

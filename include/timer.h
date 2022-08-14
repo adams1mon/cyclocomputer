@@ -20,10 +20,10 @@ class Timer
 public:
 
   Timer(
-    TIM_TypeDef* timer, 
-    uint16_t counter = 0, 
-    uint16_t prescaler = 1, 
-    uint16_t autoReloadValue = 0xffff
+      TIM_TypeDef* timer,
+      uint16_t counter = 0,
+      uint16_t prescaler = 1,
+      uint16_t autoReloadValue = 0xffff
   );
 
   // starting timer clocks consumes current so we have different methods than start/stop to control them
@@ -38,19 +38,18 @@ public:
 
   void enableInterrupt();
   void disableInterrupt();
-  
+
   // note: interrupt vector table must be mapped in SRAM to be able to set a callback function as the interrupt handler
-  void enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback);
-  void disableNVICInterrupt();
+  void enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback);
+  void disableNvicInterrupt();
 
   bool isInterruptPending();
   void clearInterruptPending();
 
-  bool isNVICInterruptPending();
-  void clearNVICInterruptPending();
+  bool isNvicInterruptPending();
+  void clearNvicInterruptPending();
 
 private:
-
   TIM_TypeDef* timer;
   uint16_t counter;
   uint16_t prescaler;
@@ -59,8 +58,7 @@ private:
   void _enablePeripherals();
   void _disablePeripherals();
 
-  IRQn_Type _getNVICInterruptForTimer();
+  IRQn_Type _getNvicInterruptForTimer();
 };
-
 
 #endif /* TIMERHEADER_H_ */

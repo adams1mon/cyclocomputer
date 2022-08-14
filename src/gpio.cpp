@@ -76,18 +76,18 @@ void GpioPin::disableExternalInterrupt()
 // enables NVIC interrupt on ALL gpio ports for a given pin,
 // there are cases when 1 interrupt line is assigned to multiple pins on all ports (9-5, 15-10)
 // TODO: introduce error handling (throw an error if the interrupt of a given line has already been set)
-void GpioPin::enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback)
+void GpioPin::enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback)
 {
-  IRQn_Type nvicInterrupt = _getNVICInterruptForLine(this->pin);
-  NVICInterrupt::setHandler(nvicInterrupt, callback);
-  NVICInterrupt::setPriority(nvicInterrupt, priority);
-  NVICInterrupt::enableInterrupt(nvicInterrupt);
+  IRQn_Type nvicInterrupt = _getNvicInterruptForLine(this->pin);
+  NvicInterrupt::setHandler(nvicInterrupt, callback);
+  NvicInterrupt::setPriority(nvicInterrupt, priority);
+  NvicInterrupt::enableInterrupt(nvicInterrupt);
 }
 
-void GpioPin::disableNVICInterrupt()
+void GpioPin::disableNvicInterrupt()
 {
-  IRQn_Type nvicInterrupt = _getNVICInterruptForLine(this->pin);
-  NVICInterrupt::disableInterrupt(nvicInterrupt);
+  IRQn_Type nvicInterrupt = _getNvicInterruptForLine(this->pin);
+  NvicInterrupt::disableInterrupt(nvicInterrupt);
 }
 
 bool GpioPin::isExternalInterruptPending()
@@ -100,14 +100,14 @@ void GpioPin::clearExternalInterruptPending()
   EXTI->PR |= (1 << this->pin);
 }
 
-bool GpioPin::isNVICInterruptPending()
+bool GpioPin::isNvicInterruptPending()
 {
-  return NVICInterrupt::getPending(_getNVICInterruptForLine(this->pin));
+  return NvicInterrupt::getPending(_getNvicInterruptForLine(this->pin));
 }
 
-void GpioPin::clearNVICInterruptPending()
+void GpioPin::clearNvicInterruptPending()
 {
-  NVICInterrupt::clearPending(_getNVICInterruptForLine(this->pin));
+  NvicInterrupt::clearPending(_getNvicInterruptForLine(this->pin));
 }
 
 
@@ -246,7 +246,7 @@ void GpioPin::_disableExternalInterrupt()
   EXTI->IMR &= ~(1 << this->pin);
 }
 
-IRQn_Type GpioPin::_getNVICInterruptForLine(int pin)
+IRQn_Type GpioPin::_getNvicInterruptForLine(int pin)
 {
   if (pin == 0)                       return EXTI0_IRQn;
   else if (pin == 1)                  return EXTI1_IRQn;

@@ -4,6 +4,7 @@
 
 #include "gpio.h"
 #include "timer.h"
+#include "rtc.h"
 
 
 #define LEDPORT (GPIOC)
@@ -34,6 +35,7 @@ void ms_delay(int ms)
 //     return 0;
 // }
 
+Rtc rtc;
 
 Timer timer_2(TIM2);
 
@@ -72,19 +74,23 @@ int main() {
   pd_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_DOWN);
   pu_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_UP);
 
-  pd_in_pin.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
+  pd_in_pin.enableNvicInterrupt(NvicInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
 
   // rewrites previous nvic interrupt handler
-  pd_in_pin.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
+  pd_in_pin.enableNvicInterrupt(NvicInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
 
   pd_in_pin.enableExternalInterrupt(GpioInterruptTrigger::RISING);
   pu_in_pin.enableExternalInterrupt(GpioInterruptTrigger::RISING);
 
 
-  timer_2.enable();
-  timer_2.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_timer);
-  timer_2.enableInterrupt();
-  timer_2.start();
+  // timer_2.enable();
+  // timer_2.enableNvicInterrupt(NvicInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_timer);
+  // timer_2.enableInterrupt();
+  // timer_2.start();
+
+  rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_timer);
+  rtc.enableInterrupt();
+  rtc.setupAndStart();
 
 
   while (true)

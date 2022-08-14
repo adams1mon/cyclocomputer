@@ -12,11 +12,11 @@
 #include "core_cm3.h"
 
 // TODO: research priorities and numbers here, ordering matters
-enum class NVICInterruptPriority:uint32_t { HIGH = 1, MEDIUM = 2, LOW = 3 };
+enum class NvicInterruptPriority:uint32_t { HIGH = 1, MEDIUM = 2, LOW = 3 };
 
-class NVICInterrupt {
+class NvicInterrupt {
   public:
-    static void setPriority(IRQn_Type interrupt, NVICInterruptPriority priority)
+    static void setPriority(IRQn_Type interrupt, NvicInterruptPriority priority)
     {
       NVIC_SetPriority(interrupt, static_cast<uint32_t>(priority));
     }
@@ -28,6 +28,8 @@ class NVICInterrupt {
 
     static void disableInterrupt(IRQn_Type interrupt)
     {
+      // set the handler to address 0
+      NVIC_SetVector(interrupt, 0x00000000);
       NVIC_DisableIRQ(interrupt);
     }
 

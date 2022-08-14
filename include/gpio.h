@@ -19,12 +19,7 @@ enum class GpioInputMode:uint8_t { ANALOG = 0x00, FLOATING = 0x04, PUPD = 0x08 }
 enum class GpioPullMode { PULL_DOWN, PULL_UP };
 enum class GpioInterruptTrigger:uint8_t { NONE, RISING, FALLING, RISING_AND_FALLING };
  
-// struct GPIOPin 
-// {
-//   GPIO_TypeDef* port;
-//   int pin;
-// };
-
+ 
 // alternate function not implemented
 class GpioPin {
 
@@ -56,14 +51,14 @@ public:
   // there are cases when 1 interrupt line is assigned to multiple pins on all ports (9-5, 15-10)
   // TODO: introduce error handling (throw an error if the interrupt of a given line has already been set)
   // note: interrupt vector table must be mapped in SRAM to be able to set a callback function as the interrupt handler
-  void enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback);
-  void disableNVICInterrupt();
+  void enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback);
+  void disableNvicInterrupt();
 
   bool isExternalInterruptPending();
   void clearExternalInterruptPending();
 
-  bool isNVICInterruptPending();
-  void clearNVICInterruptPending();
+  bool isNvicInterruptPending();
+  void clearNvicInterruptPending();
 
 private:
 
@@ -89,7 +84,7 @@ private:
   
   void _disableExternalInterrupt();
 
-  IRQn_Type _getNVICInterruptForLine(int pin);
+  IRQn_Type _getNvicInterruptForLine(int pin);
 };
 
 #endif /* GPIO_H_ */
