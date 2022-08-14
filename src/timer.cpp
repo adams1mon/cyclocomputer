@@ -1,125 +1,142 @@
 #include "timer.h"
 
-void Timer::setup(TimerInfo* timerInfo)
+Timer::Timer(TIM_TypeDef* timer, uint16_t counter, uint16_t prescaler, uint16_t autoReloadValue)
 {
-  Timer::_enablePeripherals(timerInfo);
-  timerInfo->timer->CNT = timerInfo->counter;
-	timerInfo->timer->PSC = timerInfo->prescaler;
-	timerInfo->timer->ARR = timerInfo->autoReloadValue;
+  this->timer = timer;
+  this->timer->CNT = counter;
+  this->timer->PSC = prescaler;
+  this->timer->ARR = autoReloadValue;
 }
 
-void Timer::enable(TimerInfo* timerInfo)
+void Timer::enable()
 {
-	timerInfo->timer->CR1 |= TIM_CR1_CEN;
+  _enablePeripherals();
 }
 
-void Timer::disable(TimerInfo* timerInfo) 
+void Timer::disable()
 {
-	timerInfo->timer->CR1 &= ~(TIM_CR1_CEN);
-  // TODO: disable peripherals as well ?
+  _disablePeripherals();
 }
 
-uint32_t Timer::getCount(TimerInfo* timerInfo)
+void Timer::start()
 {
-  return timerInfo->timer->CNT; 
+  this->timer->CR1 |= TIM_CR1_CEN;
 }
 
-void Timer::enableInterrupt(TimerInfo* timerInfo)
+void Timer::stop()
+{
+  this->timer->CR1 &= ~(TIM_CR1_CEN);
+}
+
+void Timer::setCounter(uint16_t counter)
+{
+  this->timer->CNT = counter;
+}
+
+uint32_t Timer::getCounter()
+{
+  return this->timer->CNT;
+}
+
+void Timer::enableInterrupt()
 {
   // reset the interrupt flag
-	timerInfo->timer->SR &= ~(TIM_SR_UIF);
+  this->timer->SR &= ~(TIM_SR_UIF);
 
   // enable timer hardware interrupt
-	timerInfo->timer->DIER |= TIM_DIER_UIE;
+  this->timer->DIER |= TIM_DIER_UIE;
 }
 
-void Timer::disableInterrupt(TimerInfo* timerInfo)
+void Timer::disableInterrupt()
 {
   // reset the interrupt flag
-	timerInfo->timer->SR &= ~(TIM_SR_UIF);
+  this->timer->SR &= ~(TIM_SR_UIF);
 
   // disable timer hardware interrupt
-	timerInfo->timer->DIER &= ~TIM_DIER_UIE;
+  this->timer->DIER &= ~TIM_DIER_UIE;
 }
 
-void Timer::enableNVICInterrupt(TimerInfo* timerInfo, NVICInterruptPriority priority, uint32_t callback)
+void Timer::enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback)
 {
-  IRQn_Type interrupt = Timer::_getNVICInterruptForTimer(timerInfo);
+  IRQn_Type interrupt = _getNVICInterruptForTimer();
   NVICInterrupt::setHandler(interrupt, callback);
   NVICInterrupt::setPriority(interrupt, priority);
   NVICInterrupt::enableInterrupt(interrupt);
 }
 
-void Timer::disableNVICInterrupt(TimerInfo* timerInfo)
+void Timer::disableNVICInterrupt()
 {
-  IRQn_Type interrupt = Timer::_getNVICInterruptForTimer(timerInfo);
+  IRQn_Type interrupt = _getNVICInterruptForTimer();
   NVICInterrupt::disableInterrupt(interrupt);
 }
 
-bool Timer::isInterruptPending(TimerInfo* timerInfo)
+bool Timer::isInterruptPending()
 {
-  return timerInfo->timer->SR & TIM_SR_UIF;
+  return this->timer->SR & TIM_SR_UIF;
 }
 
-void Timer::clearInterruptPending(TimerInfo* timerInfo)
+void Timer::clearInterruptPending()
 {
-  timerInfo->timer->SR &= ~(TIM_SR_UIF);
+  this->timer->SR &= ~(TIM_SR_UIF);
 }
 
-bool Timer::isNVICInterruptPending(TimerInfo* timerInfo)
+bool Timer::isNVICInterruptPending()
 {
-  return NVICInterrupt::getPending(Timer::_getNVICInterruptForTimer(timerInfo));
+  return NVICInterrupt::getPending(_getNVICInterruptForTimer());
 }
 
-void Timer::clearNVICInterruptPending(TimerInfo* timerInfo)
+void Timer::clearNVICInterruptPending()
 {
-  NVICInterrupt::clearPending(Timer::_getNVICInterruptForTimer(timerInfo));
+  NVICInterrupt::clearPending(_getNVICInterruptForTimer());
 }
 
-void Timer::_enablePeripherals(TimerInfo* timerInfo)
+void Timer::_enablePeripherals()
 {
   // advanced-control timers
-	if (timerInfo->timer == TIM1) 
+  if (this->timer == TIM1)
   {
-		RCC->APB2RSTR |= RCC_APB2RSTR_TIM1RST;
-		RCC->APB2RSTR &= ~(RCC_APB2RSTR_TIM1RST);
-		RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
-	} 
-  else if (timerInfo->timer == TIM2) 
+    RCC->APB2RSTR |= RCC_APB2RSTR_TIM1RST;
+    RCC->APB2RSTR &= ~(RCC_APB2RSTR_TIM1RST);
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+  }
+  else if (this->timer == TIM2)
   {
-	  // general-purpose timers
+    // general-purpose timers
     RCC->APB1RSTR |= RCC_APB1RSTR_TIM2RST;
     RCC->APB1RSTR &= ~(RCC_APB1RSTR_TIM2RST);
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-	} 
-  else if (timerInfo->timer == TIM3) {
+  }
+  else if (this->timer == TIM3)
+  {
     RCC->APB1RSTR |= RCC_APB1RSTR_TIM3RST;
     RCC->APB1RSTR &= ~(RCC_APB1RSTR_TIM3RST);
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
   }
 }
 
-void Timer::_disablePeripherals(TimerInfo* timerInfo)
+void Timer::_disablePeripherals()
 {
   // advanced-control timers
-	if (timerInfo->timer == TIM1) 
+  if (this->timer == TIM1)
   {
-		RCC->APB2ENR &= ~RCC_APB2ENR_TIM1EN;
-	} 
-  else if (timerInfo->timer == TIM2) 
+    RCC->APB2ENR &= ~RCC_APB2ENR_TIM1EN;
+  }
+  else if (this->timer == TIM2)
   {
-	  // general-purpose timers
+    // general-purpose timers
     RCC->APB1ENR &= ~RCC_APB1ENR_TIM2EN;
-	} 
-  else if (timerInfo->timer == TIM3) {
+  }
+  else if (this->timer == TIM3)
+  {
     RCC->APB1ENR &= ~RCC_APB1ENR_TIM3EN;
   }
 }
 
-IRQn_Type Timer::_getNVICInterruptForTimer(TimerInfo* timerInfo)
+IRQn_Type Timer::_getNVICInterruptForTimer()
 {
-  if (timerInfo->timer == TIM2)        return TIM2_IRQn;
-  else if (timerInfo->timer == TIM3)   return TIM3_IRQn;
+  if (this->timer == TIM2)       return TIM2_IRQn;
+  else if (this->timer == TIM3)  return TIM3_IRQn;
 
+  // shouldn't reach this point, all timers should be handled in 
   return TIM2_IRQn;
 }

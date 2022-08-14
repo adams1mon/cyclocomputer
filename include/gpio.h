@@ -14,77 +14,82 @@
 #include "nvic_interrupts.h"
 
 
-enum class GPIOOutputSpeed:uint8_t { LOW = 0x02, MEDIUM = 0x01, HIGH = 0x03 };
-enum class GPIOInputMode:uint8_t { ANALOG = 0x00, FLOATING = 0x04, PUPD = 0x08 };
-enum class GPIOPullMode { PULL_DOWN, PULL_UP };
-enum class GPIOInterruptTrigger:uint8_t { NONE, RISING, FALLING, RISING_AND_FALLING };
+enum class GpioOutputSpeed:uint8_t { LOW = 0x02, MEDIUM = 0x01, HIGH = 0x03 };
+enum class GpioInputMode:uint8_t { ANALOG = 0x00, FLOATING = 0x04, PUPD = 0x08 };
+enum class GpioPullMode { PULL_DOWN, PULL_UP };
+enum class GpioInterruptTrigger:uint8_t { NONE, RISING, FALLING, RISING_AND_FALLING };
  
-struct GPIOPin 
-{
-  GPIO_TypeDef* port;
-  int pin;
-};
+// struct GPIOPin 
+// {
+//   GPIO_TypeDef* port;
+//   int pin;
+// };
 
 // alternate function not implemented
-class GPIO {
-
-private:
-  // config and mode bits
-  static uint8_t _config_mode; 
-
-  static uint32_t _getPortBits(GPIO_TypeDef* port);
-  static void _enablePort(GPIO_TypeDef* port);
-  static void _disablePort(GPIO_TypeDef* port);
-
-  static void _clearPinConfig(GPIOPin gpioPin);
-  static void _setPinConfig(GPIOPin gpioPin);
-
-  static void _setInputPinPullUp(GPIOPin gpioPin);
-  static void _setInputPinPullDown(GPIOPin gpioPin);
-  static bool _isInputPUPD(GPIOPin gpioPin);
-  static bool _isInputPinPulledUp(GPIOPin gpioPin);
-
-  static uint32_t _getInterruptPortBits(GPIO_TypeDef* port);
-  static void _enableAlternateFunctionClock();
-  static void _configureExternalInterruptTrigger(int pin, GPIOInterruptTrigger trigger);
-  static void _enableExternalInterrupt(GPIOPin gpioPin);
-  static void _disableExternalInterrupt(GPIOPin gpioPin);
-
-  static IRQn_Type _getNVICInterruptForLine(int pin);
+class GpioPin {
 
 public:
 
-  static void init();
+  GpioPin(GPIO_TypeDef* port, int pin);
 
   // set the config and mode bits before setting a particular pin to input or output (NOT STATELESS methods)
-  static void setOutputPin(
-    GPIOPin gpioPin,
-    GPIOOutputSpeed speed = GPIOOutputSpeed::LOW, 
+  void setAsOutputPin(
+    GpioOutputSpeed speed = GpioOutputSpeed::LOW, 
     bool alternateFunction = false
   );
-  static void setInputPin(
-    GPIOPin gpioPin,
-    GPIOInputMode inputMode = GPIOInputMode::FLOATING, 
-    GPIOPullMode pullMode = GPIOPullMode::PULL_DOWN
+
+  void setAsInputPin(
+    GpioInputMode inputMode = GpioInputMode::FLOATING, 
+    GpioPullMode pullMode = GpioPullMode::PULL_DOWN
   );
-  static void resetPin(GPIOPin gpioPin);
 
-  static void writePin(GPIOPin gpioPin);
-  static void clearPin(GPIOPin gpioPin);
-  static bool readPin(GPIOPin gpioPin);
+  void resetPin();
 
-  static void enableExternalInterrupt(GPIOPin gpioPin, GPIOInterruptTrigger trigger);
-  static void disableExternalInterrupt(GPIOPin gpioPin);
+  void writePin();
+  void clearPin();
+  bool readPin();
 
+  void enableExternalInterrupt(GpioInterruptTrigger trigger);
+  void disableExternalInterrupt();
+
+  // enables NVIC interrupt on ALL gpio ports for a given pin,
+  // there are cases when 1 interrupt line is assigned to multiple pins on all ports (9-5, 15-10)
+  // TODO: introduce error handling (throw an error if the interrupt of a given line has already been set)
   // note: interrupt vector table must be mapped in SRAM to be able to set a callback function as the interrupt handler
-  static void enableNVICInterrupt(GPIOPin  gpioPin, NVICInterruptPriority priority, uint32_t callback);
-  static void disableNVICInterrupt(GPIOPin  gpioPin);
+  void enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback);
+  void disableNVICInterrupt();
 
-  static bool isExternalInterruptPending(GPIOPin gpioPin);
-  static void clearExternalInterruptPending(GPIOPin gpioPin);
+  bool isExternalInterruptPending();
+  void clearExternalInterruptPending();
 
-  static bool isNVICInterruptPending(GPIOPin gpioPin);
-  static void clearNVICInterruptPending(GPIOPin gpioPin);
+  bool isNVICInterruptPending();
+  void clearNVICInterruptPending();
+
+private:
+
+  GPIO_TypeDef* port;
+  int pin;
+
+  uint32_t _getPortBits();
+  void _enablePort();
+  void _disablePort();
+
+  void _clearPinConfig();
+  void _setPinConfig(uint8_t config_mode);
+
+  void _setInputPinPullUp();
+  void _setInputPinPullDown();
+  bool _isInputPUPD();
+  bool _isInputPinPulledUp();
+
+  uint32_t _getInterruptPortBits();
+  void _enableAlternateFunctionClock();
+  void _configureExternalInterruptTrigger(int pin, GpioInterruptTrigger trigger);
+  void _enableExternalInterrupt();
+  
+  void _disableExternalInterrupt();
+
+  IRQn_Type _getNVICInterruptForLine(int pin);
 };
 
 #endif /* GPIO_H_ */

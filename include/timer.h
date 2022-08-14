@@ -13,45 +13,53 @@
 #include "stm32f103x6.h"
 #include "nvic_interrupts.h"
 
-struct TimerInfo
-{
-  TIM_TypeDef* timer;
-  uint16_t counter;
-  uint16_t prescaler;
-  uint16_t autoReloadValue;
-};
-
 // all timers are configured as general purpose, no advanced feature timers
-// all timers are configured in edge-aligned up-counting mode
+// all timers are configured in edge-aligned up-counting mode (timers count from 0 to the auto-reload value)
 class Timer
 {
 public:
 
-  static void setup(TimerInfo* timerInfo);
-  static void enable(TimerInfo* timerInfo);
-  static void disable(TimerInfo* timerInfo);
+  Timer(
+    TIM_TypeDef* timer, 
+    uint16_t counter = 0, 
+    uint16_t prescaler = 1, 
+    uint16_t autoReloadValue = 0xffff
+  );
 
-  static uint32_t getCount(TimerInfo* timerInfo);
+  // starting timer clocks consumes current so we have different methods than start/stop to control them
+  void enable();
+  void disable();
 
-  static void enableInterrupt(TimerInfo* timerInfo);
-  static void disableInterrupt(TimerInfo* timerInfo);
+  void start();
+  void stop();
+
+  void setCounter(uint16_t counter);
+  uint32_t getCounter();
+
+  void enableInterrupt();
+  void disableInterrupt();
   
   // note: interrupt vector table must be mapped in SRAM to be able to set a callback function as the interrupt handler
-  static void enableNVICInterrupt(TimerInfo* timerInfo, NVICInterruptPriority priority, uint32_t callback);
-  static void disableNVICInterrupt(TimerInfo* timerInfo);
+  void enableNVICInterrupt(NVICInterruptPriority priority, uint32_t callback);
+  void disableNVICInterrupt();
 
-  static bool isInterruptPending(TimerInfo* timerInfo);
-  static void clearInterruptPending(TimerInfo* timerInfo);
+  bool isInterruptPending();
+  void clearInterruptPending();
 
-  static bool isNVICInterruptPending(TimerInfo* timerInfo);
-  static void clearNVICInterruptPending(TimerInfo* timerInfo);
+  bool isNVICInterruptPending();
+  void clearNVICInterruptPending();
 
 private:
 
-  static void _enablePeripherals(TimerInfo* timerInfo);
-  static void _disablePeripherals(TimerInfo* timerInfo);
+  TIM_TypeDef* timer;
+  uint16_t counter;
+  uint16_t prescaler;
+  uint16_t autoReloadValue;
 
-  static IRQn_Type _getNVICInterruptForTimer(TimerInfo* timerInfo);
+  void _enablePeripherals();
+  void _disablePeripherals();
+
+  IRQn_Type _getNVICInterruptForTimer();
 };
 
 

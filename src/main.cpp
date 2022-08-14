@@ -34,138 +34,62 @@ void ms_delay(int ms)
 //     return 0;
 // }
 
-GPIOPin out_pin {GPIOA, 10};
-GPIOPin pd_in_pin {GPIOA, 9};
-GPIOPin pu_in_pin {GPIOB, 5};
 
-TimerInfo timer_2 {TIM2, 0, 0xffff, 1};
-
-// void EXTI9_5_IRQHandler()
-// {
-//   // GPIO::setOutputPin(out_pin);
-//   GPIO::writePin(out_pin);
-
-//   ms_delay(1000);
-//   GPIO::clearPin(out_pin);
-
-//   GPIO::clearInterruptPending(pd_in_pin);
-//   GPIO::clearInterruptPending(pu_in_pin);
-// }
+Timer timer_2(TIM2);
 
 bool on = false;
+
+GpioPin out_pin(GPIOA, 10);
+GpioPin pd_in_pin(GPIOA, 9);
+GpioPin pu_in_pin(GPIOB, 5);
 
 void toggle_led() {
   on = !on;
   if (on)
-    GPIO::writePin(out_pin);
+    out_pin.writePin();
   else
-    GPIO::clearPin(out_pin);
+    out_pin.clearPin();
 }
 
 void toggle_led_with_gpio() {
 
   toggle_led();
 
-  GPIO::clearExternalInterruptPending(pd_in_pin);
-  GPIO::clearExternalInterruptPending(pu_in_pin);
+  pd_in_pin.clearExternalInterruptPending();
+  pu_in_pin.clearExternalInterruptPending();
 }
 
 void toggle_led_with_timer() {
   toggle_led();
   ms_delay(100);
-  Timer::clearInterruptPending(&timer_2);
+  timer_2.clearInterruptPending();
 }
 
 
 int main() {
 
-  GPIO::setOutputPin(out_pin);
+  out_pin.setAsOutputPin();
+  pd_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_DOWN);
+  pu_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_UP);
 
-  GPIO::setInputPin(pd_in_pin, GPIOInputMode::PUPD, GPIOPullMode::PULL_DOWN);
+  pd_in_pin.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
 
-  GPIO::setInputPin(pu_in_pin, GPIOInputMode::PUPD, GPIOPullMode::PULL_UP);
+  // rewrites previous nvic interrupt handler
+  pd_in_pin.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
 
-  GPIO::enableNVICInterrupt(pd_in_pin, NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
-  GPIO::enableNVICInterrupt(pu_in_pin, NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
-
-  GPIO::enableExternalInterrupt(pd_in_pin, GPIOInterruptTrigger::RISING);
-  GPIO::enableExternalInterrupt(pu_in_pin, GPIOInterruptTrigger::RISING);
-
-
-  Timer::setup(&timer_2);
-
-  Timer::enableNVICInterrupt(&timer_2, NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_timer);
-  Timer::enableInterrupt(&timer_2);
-
-  Timer::enable(&timer_2);
-  
-
-  // RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
+  pd_in_pin.enableExternalInterrupt(GpioInterruptTrigger::RISING);
+  pu_in_pin.enableExternalInterrupt(GpioInterruptTrigger::RISING);
 
 
-  // set corresponding bits
-	// AFIO->EXTICR[pu_in_pin.pin / 4] |= (1 << ((pu_in_pin.pin % 4) * 4));
+  timer_2.enable();
+  timer_2.enableNVICInterrupt(NVICInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_timer);
+  timer_2.enableInterrupt();
+  timer_2.start();
 
-  // EXTI->FTSR |= (1 << pu_in_pin.pin);
-
-
-  // enable interrupt on chosen line
-	// EXTI->IMR |= (1 << pu_in_pin.pin);
-
-  // NVIC_SetPriority(EXTI9_5_IRQn, 2);
-  // NVIC_EnableIRQ(EXTI9_5_IRQn);
-
-  // EXTI->PR |= (1 << pu_in_pin.pin);
 
   while (true)
   {
-    // if (EXTI->PR & (1 << pu_in_pin.pin))
-    // {
-    //   GPIO::writePin(out_pin);
-
-	  //   EXTI->PR |= (1 << pu_in_pin.pin);
-    // }
-    // else
-    // {
-    //   GPIO::clearPin(out_pin);
-    // }
-
-    // if (on) 
-    //   GPIO::writePin(out_pin);
-    // else
-    //   GPIO::clearPin(out_pin);
-
-
-
-    // if (GPIO::isInterruptPending(pu_in_pin))
-    // {
-    //   GPIO::writePin(out_pin);
-    //   GPIO::clearInterruptPending(pu_in_pin);
-    // }
-    
-    // if (GPIO::isInterruptPending(pd_in_pin))
-    // {
-    //   GPIO::clearPin(out_pin);
-    //   GPIO::clearInterruptPending(pd_in_pin);
-    // }
-
-    // if (Timer::isInterruptPending(&timer_2))
-    // {
-    //   toggle_led();
-
-    //   Timer::clearInterruptPending(&timer_2);
-    // }
-
-    // if (GPIO::readPin(pd_in_pin) || GPIO::readPin(pu_in_pin))
-    // {
-    //   GPIO::writePin(out_pin);
-    // }
-    // else
-    // {
-    //   GPIO::clearPin(out_pin);
-    // }
-
-    // GPIO::clearPin(GPIOA, out_pin);
+  
   }
 
   return 0;
