@@ -67,14 +67,18 @@ void toggle_led_with_timer() {
   timer_2.clearInterruptPending();
 }
 
+void toggle_led_with_rtc() {
+  toggle_led();
+  rtc.clearInterruptPending();
+  rtc.clearNvicInterruptPending();
+}
+
 
 int main() {
 
   out_pin.setAsOutputPin();
   pd_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_DOWN);
   pu_in_pin.setAsInputPin(GpioInputMode::PUPD, GpioPullMode::PULL_UP);
-
-  pd_in_pin.enableNvicInterrupt(NvicInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
 
   // rewrites previous nvic interrupt handler
   pd_in_pin.enableNvicInterrupt(NvicInterruptPriority::MEDIUM, (uint32_t) toggle_led_with_gpio);
@@ -88,9 +92,8 @@ int main() {
   // timer_2.enableInterrupt();
   // timer_2.start();
 
-  rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_timer);
-  rtc.enableInterrupt();
-  rtc.setupAndStart();
+  rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_rtc);
+  rtc.setupAndStartWithNVICInterrupt();
 
 
   while (true)

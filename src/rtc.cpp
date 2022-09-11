@@ -19,6 +19,8 @@ void Rtc::setupAndStart()
   _enableConfigMode();
   _setPrescaler();
 
+  _disableInterrupt();
+
   // clock starts ticking when config mode is disabled
 	_disableConfigMode();
 
@@ -26,14 +28,26 @@ void Rtc::setupAndStart()
   _disablePowerAndBackupClocks();
 }
 
-void Rtc::enableInterrupt()
+void Rtc::setupAndStartWithNVICInterrupt()
 {
-  RTC->CRH |= RTC_CRH_SECIE;
-}
+	_enablePowerAndBackupClocks();
+  _disableBackupDomainWriteProtect();
 
-void Rtc::disableInterrupt()
-{
-  RTC->CRH &= ~RTC_CRH_SECIE;
+  _startLseOscillator();
+  _selectLseAsSource();
+
+  _enable();
+
+  _enableConfigMode();
+  _setPrescaler();
+
+  _enableInterrupt();
+
+  // clock starts ticking when config mode is disabled
+	_disableConfigMode();
+
+  _enableBackupDomainWriteProtect();
+  _disablePowerAndBackupClocks();
 }
 
 void Rtc::enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback)
@@ -142,12 +156,19 @@ void Rtc::_disableConfigMode()
 // prescaler is 20 bits long
 void Rtc::_setPrescaler()
 {
-  RTC->PRLH = 0x0000;
-  RTC->PRLL = 0x0000;
-
-  // high 4 bits of 20 bits
-  RTC->PRLH |= (0x000F & (this->prescaler >> 16));
+  // higher 4 bits
+  RTC->PRLH = this->prescaler >> 16;
 
   // lower 16 bits
-  RTC->PRLL |= this->prescaler;
+  RTC->PRLL = this->prescaler;
+}
+
+void Rtc::_enableInterrupt()
+{
+  RTC->CRH |= RTC_CRH_SECIE;
+}
+
+void Rtc::_disableInterrupt()
+{
+  RTC->CRH &= ~RTC_CRH_SECIE;
 }

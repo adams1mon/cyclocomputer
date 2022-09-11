@@ -26,9 +26,7 @@ public:
   Rtc(uint32_t prescaler = RTC_PRESCALER_SECONDS);
 
   void setupAndStart();
-
-  void enableInterrupt();
-  void disableInterrupt();
+  void setupAndStartWithNVICInterrupt();
 
   // note: interrupt vector table must be mapped in SRAM to be able to set a callback function as the interrupt handler
   void enableNvicInterrupt(NvicInterruptPriority priority, uint32_t callback);
@@ -59,6 +57,9 @@ private:
   void _selectLseAsSource();
 
   void _setPrescaler();
+
+  void _enableInterrupt();
+  void _disableInterrupt();
 };
 
 
