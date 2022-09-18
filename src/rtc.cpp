@@ -1,5 +1,4 @@
-
-#include "rtc.h"
+#include "rtc.hpp"
 
 Rtc::Rtc(uint32_t prescaler)
 {

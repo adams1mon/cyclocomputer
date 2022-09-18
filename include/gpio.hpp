@@ -1,18 +1,10 @@
-/*
- * gpio.h
- *
- *  Created on: Jul 10, 2022
- *      Author: Adam Simon
- */
-
 #ifndef GPIO_H_
 #define GPIO_H_
 
 #include "stm32f103x6.h"
 #include "core_cm3.h"
 
-#include "nvic_interrupts.h"
-
+#include "nvic_interrupts.hpp"
 
 enum class GpioOutputSpeed:uint8_t { LOW = 0x02, MEDIUM = 0x01, HIGH = 0x03 };
 enum class GpioInputMode:uint8_t { ANALOG = 0x00, FLOATING = 0x04, PUPD = 0x08 };

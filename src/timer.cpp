@@ -1,4 +1,4 @@
-#include "timer.h"
+#include "timer.hpp"
 
 Timer::Timer(TIM_TypeDef* timer, uint16_t counter, uint16_t prescaler, uint16_t autoReloadValue)
 {

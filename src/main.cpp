@@ -2,9 +2,10 @@
 #include "core_cm3.h"
 
 
-#include "gpio.h"
-#include "timer.h"
-#include "rtc.h"
+#include "gpio.hpp"
+#include "timer.hpp"
+#include "rtc.hpp"
+#include "event.hpp"
 
 
 #define LEDPORT (GPIOC)
@@ -21,19 +22,6 @@ void ms_delay(int ms)
          __asm("nop");
    }
 }
-
-// //Alternates blue and green LEDs quickly
-// int main(void)
-// {
-//     ENABLE_GPIO_CLOCK;              // enable the clock to GPIO
-//     LEDPORT->_MODER |= GPIOMODER;   // set pins to be general purpose output
-//     for (;;) {
-//     ms_delay(500);
-//     LEDPORT->ODR ^= (1<<LED1);  // toggle diodes
-//     }
-
-//     return 0;
-// }
 
 Rtc rtc;
 
@@ -69,8 +57,24 @@ void toggle_led_with_timer() {
 
 void toggle_led_with_rtc() {
   toggle_led();
+  ms_delay(2000);
+  toggle_led();
   rtc.clearInterruptPending();
   rtc.clearNvicInterruptPending();
+}
+
+void toggle_led_with_rtc_0() {
+  toggle_led();
+  ms_delay(200);
+  toggle_led();
+  ms_delay(500);
+}
+
+
+Event rtcEvent;
+
+void emitRtcEvent() {
+  rtcEvent.emit();
 }
 
 
@@ -92,7 +96,11 @@ int main() {
   // timer_2.enableInterrupt();
   // timer_2.start();
 
-  rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_rtc);
+  rtcEvent.addListener((uint32_t) (toggle_led_with_rtc_0));
+  rtcEvent.addListener((uint32_t) (toggle_led_with_rtc));
+
+  // rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_rtc);
+  rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) emitRtcEvent);
   rtc.setupAndStartWithNVICInterrupt();
 
 

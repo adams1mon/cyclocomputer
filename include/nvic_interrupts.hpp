@@ -1,10 +1,3 @@
-/*
- * interrupts.h
- *
- *  Created on: Jul 17, 2022
- *      Author: Adam Simon
- */
-
 #ifndef NVIC_INTERRUPTS_H_
 #define NVIC_INTERRUPTS_H_
 

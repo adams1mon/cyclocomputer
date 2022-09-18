@@ -1,4 +1,4 @@
-#include "gpio.h"
+#include "gpio.hpp"
 
 GpioPin::GpioPin(GPIO_TypeDef* port, int pin)
 {

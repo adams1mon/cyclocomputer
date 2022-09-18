@@ -1,17 +1,8 @@
-/*
- * Timers on STM32F103C8T6
- *
- * timer.h
- *
- *  Created on: Aug 14, 2022
- *      Author: Adam Simon
- */
-
 #ifndef RTCHEADER_H_
 #define RTCHEADER_H_
 
 #include "stm32f103x6.h"
-#include "nvic_interrupts.h"
+#include "nvic_interrupts.hpp"
 
 // RTC final frequency = Input Clock Frequency / (PRESCALER + 1)
 

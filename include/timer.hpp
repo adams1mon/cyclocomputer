@@ -1,17 +1,8 @@
-/*
- * Timers on STM32F103C8T6
- *
- * timer.h
- *
- *  Created on: Aug 7, 2022
- *      Author: Adam Simon
- */
-
 #ifndef TIMERHEADER_H_
 #define TIMERHEADER_H_
 
 #include "stm32f103x6.h"
-#include "nvic_interrupts.h"
+#include "nvic_interrupts.hpp"
 
 // all timers are configured as general purpose, no advanced feature timers
 // all timers are configured in edge-aligned up-counting mode (timers count from 0 to the auto-reload value)
