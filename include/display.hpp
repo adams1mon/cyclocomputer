@@ -16,10 +16,10 @@ struct DisplayPoint
 class Display
 {
 public:
-  virtual void moveCursor(uint8_t x, uint8_t y) = 0;
-  virtual void moveCursorBuffer(uint8_t x, uint8_t y) = 0;
-  virtual void drawPixel(uint8_t x, uint8_t y) = 0;
-  virtual void drawPixelBuffer(uint8_t x, uint8_t y) = 0;
+  virtual void moveCursor(DisplayPoint p) = 0;
+  virtual void moveCursorBuffer(DisplayPoint p) = 0;
+  virtual void drawPixel(DisplayPoint p) = 0;
+  virtual void drawPixelBuffer(DisplayPoint p) = 0;
 
   // flushes the buffer onto the screen
   virtual void refresh() = 0;
