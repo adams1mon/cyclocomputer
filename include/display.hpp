@@ -17,7 +17,7 @@ class Display
 {
 public:
   virtual void moveCursor(uint8_t x, uint8_t y) = 0;
-  virtual void moveCursorBuf(uint8_t x, uint8_t y) = 0;
+  virtual void moveCursorBuffer(uint8_t x, uint8_t y) = 0;
   virtual void drawPixel(uint8_t x, uint8_t y) = 0;
   virtual void drawPixelBuffer(uint8_t x, uint8_t y) = 0;
 
