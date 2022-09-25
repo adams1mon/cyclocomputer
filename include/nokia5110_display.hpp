@@ -5,9 +5,9 @@
 #include "gpio.hpp"
 
 // implements functionality for a nokia 5110 lcd
-#define WIDTH 84
-#define HEIGHT 48
-#define SCREEN_SIZE WIDTH*HEIGHT
+#define NOKIA_WIDTH 84
+#define NOKIA_HEIGHT 48
+#define NOKIA_SCREEN_SIZE WIDTH*HEIGHT
 
 struct NokiaDisplayConfig 
 {
@@ -26,22 +26,22 @@ struct NokiaDisplayConfig
 class NokiaDisplay : Display
 {
 public:
+  NokiaDisplay(NokiaDisplayConfig* config);
 
-  NokiaDisplay(NokiaDisplayConfig config);
+  void init();
+  void drawPixel(DisplayPoint p);
+  void refresh(DisplayPoint min, DisplayPoint max);
 
-  void moveCursor(DisplayPoint p) = 0;
-  void moveCursorBuffer(DisplayPoint p) = 0;
-  void drawPixel(DisplayPoint p) = 0;
-  void drawPixelBuffer(DisplayPoint p) = 0;
-
-  // flushes the buffer onto the screen
-  void refresh() = 0;
-  void refresh(DisplayPoint min, DisplayPoint max) = 0;
+  void refreshEntireScreen();
 
 private:
+  NokiaDisplayConfig* _config;
 
-  // buffer
-  uint8_t _buffer[SCREEN_SIZE];
+  void _send(uint8_t data);
+  void _sendCommand(uint8_t command);
+  void _sendData(uint8_t data);
+
+  void _moveCursor(DisplayPoint p);
 };
 
 

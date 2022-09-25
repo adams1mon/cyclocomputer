@@ -12,7 +12,7 @@ enum class GpioPullMode { PULL_DOWN, PULL_UP };
 enum class GpioInterruptTrigger:uint8_t { NONE, RISING, FALLING, RISING_AND_FALLING };
  
  
-// alternate function not implemented
+// alternate function GPIOs not implemented
 class GpioPin {
 
 public:

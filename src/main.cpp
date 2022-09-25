@@ -7,6 +7,8 @@
 #include "rtc.hpp"
 #include "event.hpp"
 
+#include "nokia5110_display.hpp"
+
 
 #define LEDPORT (GPIOC)
 #define LED1 (13)
@@ -78,6 +80,32 @@ void emitRtcEvent() {
 }
 
 
+
+// ===============  LCD  ===============
+// NokiaDisplayConfig nokiaConfig = {
+//   rst: GpioPin(GPIOA, 6),
+//   ce: GpioPin(GPIOA, 5),
+//   dc: GpioPin(GPIOA, 4),
+//   din: GpioPin(GPIOA, 3),
+//   clk: GpioPin(GPIOA, 2),
+// };
+
+GpioPin rst(GPIOA, 6);
+GpioPin ce(GPIOA, 5);
+GpioPin dc(GPIOA, 4);
+GpioPin din(GPIOA, 3);
+GpioPin clk(GPIOA, 2);
+
+NokiaDisplayConfig nokiaConfig = {
+  rst, ce, dc, din, clk
+};
+
+GpioPin nokiaLcdVcc(GPIOA, 1);
+NokiaDisplay nokiaDisplay(&nokiaConfig);
+
+// ====================================
+
+
 int main() {
 
   out_pin.setAsOutputPin();
@@ -102,6 +130,11 @@ int main() {
   // rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) toggle_led_with_rtc);
   rtc.enableNvicInterrupt(NvicInterruptPriority::HIGH, (uint32_t) emitRtcEvent);
   rtc.setupAndStartWithNVICInterrupt();
+
+
+  nokiaLcdVcc.writePin();
+  nokiaDisplay.init();
+  nokiaDisplay.drawPixel({20, 20});
 
 
   while (true)
